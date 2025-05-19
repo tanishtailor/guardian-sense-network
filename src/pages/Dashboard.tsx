@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Shield, AlertTriangle, MessageCircle, MapPin } from 'lucide-react';
+import { Shield, AlertTriangle, MessageCircle, MapPin, Bell } from 'lucide-react';
 import RecentIncidents from '@/components/dashboard/RecentIncidents';
 
 // Mock data for charts
