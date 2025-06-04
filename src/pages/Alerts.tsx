@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, AlertTriangle, MapPin, Shield, Plus, Loader2 } from 'lucide-react';
+import { Bell, AlertTriangle, MapPin, Shield, Loader2 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import { useAlerts, useDismissAlert } from '@/hooks/useAlerts';
@@ -19,11 +20,31 @@ const Alerts: React.FC = () => {
   const [locationTracking, setLocationTracking] = useState(true);
   const [alertRadius, setAlertRadius] = useState([5]);
   
-  const handleClearAll = () => {
-    toast({
-      title: 'Alerts Cleared',
-      description: 'All alerts have been cleared from your feed.',
-    });
+  const handleClearAll = async () => {
+    if (!alerts || alerts.length === 0) {
+      toast({
+        title: 'No alerts to clear',
+        description: 'There are no active alerts to clear.',
+      });
+      return;
+    }
+
+    try {
+      // Dismiss all active alerts
+      for (const alert of alerts) {
+        await dismissAlert.mutateAsync(alert.id);
+      }
+      toast({
+        title: 'All Alerts Cleared',
+        description: 'All alerts have been cleared from your feed.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to clear all alerts. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleDismissAlert = async (alertId: string) => {
@@ -80,9 +101,10 @@ const Alerts: React.FC = () => {
         <Button
           className="mt-4 sm:mt-0"
           variant="outline"
-          onClick={() => handleClearAll()}
+          onClick={handleClearAll}
+          disabled={dismissAlert.isPending}
         >
-          Clear All Alerts
+          {dismissAlert.isPending ? 'Clearing...' : 'Clear All Alerts'}
         </Button>
       </div>
 
