@@ -2,10 +2,23 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Bell, User } from 'lucide-react';
+import { Bell, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Navbar: React.FC = () => {
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
     <header className="border-b border-border bg-card">
       <div className="flex h-16 items-center px-4 md:px-6">
@@ -27,9 +40,23 @@ const Navbar: React.FC = () => {
               3
             </span>
           </Button>
-          <Button variant="ghost" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="font-medium">
+                {user?.email}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

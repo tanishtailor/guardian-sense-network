@@ -9,7 +9,117 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      alerts: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          location_address: string | null
+          location_lat: number | null
+          location_lng: number | null
+          message: string
+          priority: Database["public"]["Enums"]["alert_priority"]
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          message: string
+          priority?: Database["public"]["Enums"]["alert_priority"]
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          message?: string
+          priority?: Database["public"]["Enums"]["alert_priority"]
+          title?: string
+        }
+        Relationships: []
+      }
+      incidents: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          incident_type: Database["public"]["Enums"]["incident_type"]
+          location_address: string | null
+          location_lat: number | null
+          location_lng: number | null
+          status: Database["public"]["Enums"]["incident_status"]
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          incident_type: Database["public"]["Enums"]["incident_type"]
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          status?: Database["public"]["Enums"]["incident_status"]
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          incident_type?: Database["public"]["Enums"]["incident_type"]
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          status?: Database["public"]["Enums"]["incident_status"]
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          emergency_contact: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          emergency_contact?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          emergency_contact?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +128,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      alert_priority: "low" | "medium" | "high" | "critical"
+      incident_status: "active" | "responding" | "monitoring" | "resolved"
+      incident_type:
+        | "fire"
+        | "accident"
+        | "medical"
+        | "crime"
+        | "weather"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +251,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      alert_priority: ["low", "medium", "high", "critical"],
+      incident_status: ["active", "responding", "monitoring", "resolved"],
+      incident_type: [
+        "fire",
+        "accident",
+        "medical",
+        "crime",
+        "weather",
+        "other",
+      ],
+    },
   },
 } as const
