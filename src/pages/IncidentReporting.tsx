@@ -1,191 +1,224 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertTriangle, Shield, MapPin, Camera, MessageCircle } from 'lucide-react';
+import { MapPin, AlertTriangle, Phone, Clock } from 'lucide-react';
+import { useCreateIncident } from '@/hooks/useIncidents';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 const IncidentReporting: React.FC = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [step, setStep] = useState(1);
-  const [incidentType, setIncidentType] = useState('');
-  const [urgency, setUrgency] = useState('medium');
+  const createIncident = useCreateIncident();
   
-  // This would normally handle form submission with real data
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    incident_type: '',
+    location_address: '',
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: 'Incident Reported',
-      description: 'Your report has been submitted successfully. Emergency services have been notified.',
-      variant: 'default',
-    });
-    // In a real app, this would submit to an API and potentially alert emergency services
+    
+    if (!user) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in to report an incident.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!formData.title || !formData.incident_type) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      await createIncident.mutateAsync({
+        ...formData,
+        user_id: user.id,
+        incident_type: formData.incident_type as any,
+      });
+
+      toast({
+        title: 'Incident Reported',
+        description: 'Your incident report has been submitted successfully.',
+      });
+
+      // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        incident_type: '',
+        location_address: '',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to submit incident report. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
-  
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Report an Incident</h1>
         <p className="text-muted-foreground">
-          Help keep your community safe by reporting incidents as they happen.
+          Help keep your community safe by reporting incidents in your area.
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Incident Report Form</CardTitle>
-          <CardDescription>
-            Please provide as much detail as possible to help emergency services respond effectively.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            {step === 1 && (
-              <div className="space-y-6 animate-fade-in">
-                <div className="space-y-2">
-                  <Label htmlFor="incident-type">Incident Type</Label>
-                  <Select value={incidentType} onValueChange={setIncidentType}>
-                    <SelectTrigger id="incident-type">
-                      <SelectValue placeholder="Select incident type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="fire">Fire</SelectItem>
-                      <SelectItem value="medical">Medical Emergency</SelectItem>
-                      <SelectItem value="accident">Traffic Accident</SelectItem>
-                      <SelectItem value="crime">Crime in Progress</SelectItem>
-                      <SelectItem value="hazard">Environmental Hazard</SelectItem>
-                      <SelectItem value="other">Other (Specify)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="urgency">Urgency Level</Label>
-                  <RadioGroup
-                    defaultValue="medium"
-                    value={urgency}
-                    onValueChange={setUrgency}
-                    className="flex flex-col space-y-1"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="high" id="high" />
-                      <Label htmlFor="high" className="font-normal flex items-center">
-                        <AlertTriangle className="h-4 w-4 text-guardian-emergency mr-2" />
-                        High - Immediate danger to life
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="medium" id="medium" />
-                      <Label htmlFor="medium" className="font-normal flex items-center">
-                        <Shield className="h-4 w-4 text-guardian-warning mr-2" />
-                        Medium - Urgent but not life-threatening
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="low" id="low" />
-                      <Label htmlFor="low" className="font-normal flex items-center">
-                        <MapPin className="h-4 w-4 text-guardian-info mr-2" />
-                        Low - General information or non-urgent
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="location"
-                      placeholder="Enter address or description of location"
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => console.log('Get current location')}
-                    >
-                      <MapPin className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Click the map marker to use your current location
-                  </p>
-                </div>
-
-                <Button
-                  type="button"
-                  className="w-full"
-                  onClick={() => setStep(2)}
-                  disabled={!incidentType}
-                >
-                  Continue
-                </Button>
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="col-span-2 md:col-span-1">
+          <CardHeader>
+            <CardTitle>Incident Details</CardTitle>
+            <CardDescription>
+              Provide as much detail as possible about the incident.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="title">Incident Title *</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  placeholder="Brief description of the incident"
+                  required
+                />
               </div>
-            )}
 
-            {step === 2 && (
-              <div className="space-y-6 animate-fade-in">
-                <div className="space-y-2">
-                  <Label htmlFor="description">Incident Description</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe what happened, who is involved, and any relevant details"
-                    rows={4}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="type">Incident Type *</Label>
+                <Select value={formData.incident_type} onValueChange={(value) => handleInputChange('incident_type', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select incident type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fire">Fire</SelectItem>
+                    <SelectItem value="accident">Accident</SelectItem>
+                    <SelectItem value="medical">Medical Emergency</SelectItem>
+                    <SelectItem value="crime">Crime</SelectItem>
+                    <SelectItem value="weather">Weather Related</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div className="space-y-2">
-                  <Label>Media Evidence</Label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button type="button" variant="outline" className="h-24 flex flex-col items-center justify-center">
-                      <Camera className="h-8 w-8 mb-2" />
-                      <span>Add Photo</span>
-                    </Button>
-                    <Button type="button" variant="outline" className="h-24 flex flex-col items-center justify-center">
-                      <MessageCircle className="h-8 w-8 mb-2" />
-                      <span>Add Voice Note</span>
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Adding photos or voice recordings helps emergency responders assess the situation
-                  </p>
-                </div>
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  value={formData.location_address}
+                  onChange={(e) => handleInputChange('location_address', e.target.value)}
+                  placeholder="Street address or nearby landmark"
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="contact">Contact Information (Optional)</Label>
-                  <Input id="contact" placeholder="Phone number to reach you if needed" />
-                  <p className="text-xs text-muted-foreground">
-                    Your information will be kept confidential and only used for emergency response
-                  </p>
-                </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Provide additional details about the incident..."
+                  rows={4}
+                />
+              </div>
 
-                <div className="flex space-x-4">
-                  <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(1)}>
-                    Back
-                  </Button>
-                  <Button type="submit" className="flex-1 bg-guardian-emergency hover:bg-red-700">
-                    Submit Report
-                  </Button>
+              <Button 
+                type="submit" 
+                className="w-full bg-guardian-emergency hover:bg-red-700"
+                disabled={createIncident.isPending}
+              >
+                {createIncident.isPending ? 'Submitting...' : 'Report Incident'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Phone className="h-5 w-5 mr-2 text-guardian-emergency" />
+                Emergency Contacts
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-guardian-emergency/10 rounded-lg">
+                <h3 className="font-semibold text-guardian-emergency">Emergency Services</h3>
+                <p className="text-2xl font-bold">911</p>
+                <p className="text-sm text-muted-foreground">For immediate life-threatening emergencies</p>
+              </div>
+              
+              <div className="p-4 bg-guardian-info/10 rounded-lg">
+                <h3 className="font-semibold text-guardian-info">Non-Emergency Police</h3>
+                <p className="text-lg font-semibold">(415) 553-0123</p>
+                <p className="text-sm text-muted-foreground">For non-urgent police matters</p>
+              </div>
+              
+              <div className="p-4 bg-guardian-warning/10 rounded-lg">
+                <h3 className="font-semibold text-guardian-warning">Poison Control</h3>
+                <p className="text-lg font-semibold">1-800-222-1222</p>
+                <p className="text-sm text-muted-foreground">24/7 poison emergency helpline</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <AlertTriangle className="h-5 w-5 mr-2 text-guardian-warning" />
+                Reporting Guidelines
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-start">
+                <Clock className="h-4 w-4 mt-1 mr-2 text-guardian-info" />
+                <div>
+                  <p className="font-medium">Report Immediately</p>
+                  <p className="text-sm text-muted-foreground">Time-sensitive incidents should be reported as soon as safely possible.</p>
                 </div>
               </div>
-            )}
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col text-center border-t pt-6">
-          <div className="flex items-center justify-center mb-2">
-            <Shield className="h-5 w-5 text-guardian-info mr-2" />
-            <span className="font-semibold">Emergency Services Hotline</span>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            For immediate assistance, call 911 or your local emergency number
-          </p>
-        </CardFooter>
-      </Card>
+              
+              <div className="flex items-start">
+                <MapPin className="h-4 w-4 mt-1 mr-2 text-guardian-info" />
+                <div>
+                  <p className="font-medium">Precise Location</p>
+                  <p className="text-sm text-muted-foreground">Include specific addresses, landmarks, or cross streets when possible.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <AlertTriangle className="h-4 w-4 mt-1 mr-2 text-guardian-info" />
+                <div>
+                  <p className="font-medium">Stay Safe</p>
+                  <p className="text-sm text-muted-foreground">Your safety is the priority. Don't put yourself at risk to gather information.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };

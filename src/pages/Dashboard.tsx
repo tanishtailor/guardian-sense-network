@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Shield, AlertTriangle, MessageCircle, MapPin, Bell } from 'lucide-react';
 import RecentIncidents from '@/components/dashboard/RecentIncidents';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 
 // Mock data for charts
 const incidentData = [
@@ -19,6 +20,8 @@ const incidentData = [
 ];
 
 const Dashboard: React.FC = () => {
+  const { data: stats, isLoading } = useDashboardStats();
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
@@ -42,9 +45,11 @@ const Dashboard: React.FC = () => {
             <Shield className="h-4 w-4 text-guardian-emergency" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
+            <div className="text-2xl font-bold">
+              {isLoading ? '...' : stats?.activeIncidents || 0}
+            </div>
             <p className="text-xs text-muted-foreground">
-              +2 from last hour
+              Currently being handled
             </p>
           </CardContent>
         </Card>
@@ -54,9 +59,11 @@ const Dashboard: React.FC = () => {
             <AlertTriangle className="h-4 w-4 text-guardian-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">
+              {isLoading ? '...' : stats?.activeAlerts || 0}
+            </div>
             <p className="text-xs text-muted-foreground">
-              -1 from yesterday
+              Active in your area
             </p>
           </CardContent>
         </Card>
@@ -66,9 +73,11 @@ const Dashboard: React.FC = () => {
             <Shield className="h-4 w-4 text-guardian-info" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5.2m</div>
+            <div className="text-2xl font-bold">
+              {isLoading ? '...' : stats?.responseTime || 'N/A'}
+            </div>
             <p className="text-xs text-muted-foreground">
-              12% faster than average
+              Average response time
             </p>
           </CardContent>
         </Card>
@@ -78,9 +87,11 @@ const Dashboard: React.FC = () => {
             <MapPin className="h-4 w-4 text-guardian-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">18</div>
+            <div className="text-2xl font-bold">
+              {isLoading ? '...' : stats?.safeZones || 0}
+            </div>
             <p className="text-xs text-muted-foreground">
-              +3 from last week
+              Verified safe locations
             </p>
           </CardContent>
         </Card>
