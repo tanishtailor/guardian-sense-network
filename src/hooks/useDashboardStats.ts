@@ -22,21 +22,9 @@ export const useDashboardStats = () => {
 
       if (alertsError) throw alertsError;
 
-      // Get total incidents for response time calculation
-      const { data: allIncidents, error: allIncidentsError } = await supabase
-        .from('incidents')
-        .select('created_at, status');
-
-      if (allIncidentsError) throw allIncidentsError;
-
-      // Calculate average response time (mock calculation)
-      const resolvedIncidents = allIncidents.filter(i => i.status === 'resolved');
-      const avgResponseTime = resolvedIncidents.length > 0 ? '5.2m' : 'N/A';
-
       return {
         activeIncidents: activeIncidents.length,
         activeAlerts: activeAlerts.length,
-        responseTime: avgResponseTime,
         safeZones: 18, // This could be from another table in the future
       };
     },

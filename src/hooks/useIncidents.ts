@@ -47,12 +47,17 @@ export const useDeleteIncident = () => {
   
   return useMutation({
     mutationFn: async (incidentId: string) => {
+      console.log('Attempting to delete incident:', incidentId);
       const { error } = await supabase
         .from('incidents')
         .delete()
         .eq('id', incidentId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+      console.log('Incident deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incidents'] });

@@ -48,12 +48,17 @@ export const useDismissAlert = () => {
   
   return useMutation({
     mutationFn: async (alertId: string) => {
+      console.log('Attempting to dismiss alert:', alertId);
       const { error } = await supabase
         .from('alerts')
         .update({ is_active: false })
         .eq('id', alertId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Dismiss error:', error);
+        throw error;
+      }
+      console.log('Alert dismissed successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
@@ -67,12 +72,17 @@ export const useDeleteAlert = () => {
   
   return useMutation({
     mutationFn: async (alertId: string) => {
+      console.log('Attempting to delete alert:', alertId);
       const { error } = await supabase
         .from('alerts')
         .delete()
         .eq('id', alertId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+      console.log('Alert deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });

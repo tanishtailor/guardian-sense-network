@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bell, AlertTriangle, MapPin, Shield, Loader2, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAlerts, useDismissAlert } from '@/hooks/useAlerts';
+import { useAlerts, useDeleteAlert } from '@/hooks/useAlerts';
 import { format } from 'date-fns';
 
 const Alerts: React.FC = () => {
   const { toast } = useToast();
   const { data: alerts, isLoading, error } = useAlerts();
-  const dismissAlert = useDismissAlert();
+  const deleteAlert = useDeleteAlert();
   
   const handleClearAll = async () => {
     if (!alerts || alerts.length === 0) {
@@ -23,9 +23,9 @@ const Alerts: React.FC = () => {
     }
 
     try {
-      // Dismiss all active alerts
+      // Delete all active alerts
       for (const alert of alerts) {
-        await dismissAlert.mutateAsync(alert.id);
+        await deleteAlert.mutateAsync(alert.id);
       }
       toast({
         title: 'All Alerts Cleared',
@@ -40,17 +40,17 @@ const Alerts: React.FC = () => {
     }
   };
 
-  const handleDismissAlert = async (alertId: string) => {
+  const handleDeleteAlert = async (alertId: string) => {
     try {
-      await dismissAlert.mutateAsync(alertId);
+      await deleteAlert.mutateAsync(alertId);
       toast({
-        title: 'Alert Dismissed',
-        description: 'The alert has been dismissed successfully.',
+        title: 'Alert Deleted',
+        description: 'The alert has been deleted successfully.',
       });
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to dismiss alert. Please try again.',
+        description: 'Failed to delete alert. Please try again.',
         variant: 'destructive',
       });
     }
@@ -95,9 +95,9 @@ const Alerts: React.FC = () => {
           className="mt-4 sm:mt-0"
           variant="outline"
           onClick={handleClearAll}
-          disabled={dismissAlert.isPending}
+          disabled={deleteAlert.isPending}
         >
-          {dismissAlert.isPending ? 'Clearing...' : 'Clear All Alerts'}
+          {deleteAlert.isPending ? 'Clearing...' : 'Clear All Alerts'}
         </Button>
       </div>
 
@@ -150,8 +150,8 @@ const Alerts: React.FC = () => {
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      onClick={() => handleDismissAlert(alert.id)}
-                      disabled={dismissAlert.isPending}
+                      onClick={() => handleDeleteAlert(alert.id)}
+                      disabled={deleteAlert.isPending}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
