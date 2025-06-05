@@ -1,12 +1,32 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Shield, AlertTriangle, MapPin, Clock } from 'lucide-react';
-import { useIncidents } from '@/hooks/useIncidents';
+import { Button } from '@/components/ui/button';
+import { Shield, AlertTriangle, MapPin, Clock, Trash2 } from 'lucide-react';
+import { useIncidents, useDeleteIncident } from '@/hooks/useIncidents';
+import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
 const RecentIncidents: React.FC = () => {
   const { data: incidents, isLoading } = useIncidents();
+  const deleteIncident = useDeleteIncident();
+  const { toast } = useToast();
+
+  const handleDeleteIncident = async (incidentId: string) => {
+    try {
+      await deleteIncident.mutateAsync(incidentId);
+      toast({
+        title: 'Incident Deleted',
+        description: 'The incident report has been deleted successfully.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete incident. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   // Helper function to get badge variant based on status
   const getBadgeVariant = (status: string) => {
@@ -112,13 +132,23 @@ const RecentIncidents: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col items-end">
-                <Badge className={getBadgeVariant(incident.status)}>
-                  {getStatusText(incident.status)}
-                </Badge>
-                <span className="text-xs text-muted-foreground mt-1">
-                  {format(new Date(incident.created_at!), 'MMM dd, h:mm a')}
-                </span>
+              <div className="flex items-center space-x-2">
+                <div className="flex flex-col items-end">
+                  <Badge className={getBadgeVariant(incident.status)}>
+                    {getStatusText(incident.status)}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground mt-1">
+                    {format(new Date(incident.created_at!), 'MMM dd, h:mm a')}
+                  </span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => handleDeleteIncident(incident.id)}
+                  disabled={deleteIncident.isPending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>

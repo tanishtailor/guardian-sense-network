@@ -61,3 +61,22 @@ export const useDismissAlert = () => {
     },
   });
 };
+
+export const useDeleteAlert = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (alertId: string) => {
+      const { error } = await supabase
+        .from('alerts')
+        .delete()
+        .eq('id', alertId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alerts'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+  });
+};

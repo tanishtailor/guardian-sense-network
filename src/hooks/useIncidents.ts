@@ -42,6 +42,25 @@ export const useCreateIncident = () => {
   });
 };
 
+export const useDeleteIncident = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (incidentId: string) => {
+      const { error } = await supabase
+        .from('incidents')
+        .delete()
+        .eq('id', incidentId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['incidents'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+  });
+};
+
 export const useIncidentStats = () => {
   return useQuery({
     queryKey: ['incident-stats'],

@@ -3,21 +3,9 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Shield, AlertTriangle, MessageCircle, MapPin, Bell } from 'lucide-react';
 import RecentIncidents from '@/components/dashboard/RecentIncidents';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
-
-// Mock data for charts
-const incidentData = [
-  { name: 'Mon', incidents: 4 },
-  { name: 'Tue', incidents: 3 },
-  { name: 'Wed', incidents: 2 },
-  { name: 'Thu', incidents: 6 },
-  { name: 'Fri', incidents: 8 },
-  { name: 'Sat', incidents: 5 },
-  { name: 'Sun', incidents: 2 },
-];
 
 const Dashboard: React.FC = () => {
   const { data: stats, isLoading } = useDashboardStats();
@@ -97,42 +85,17 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Incident Overview</CardTitle>
-            <CardDescription>
-              7-day incident report statistics
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={incidentData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="incidents" stroke="#E53935" activeDot={{ r: 8 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Recent Incidents</CardTitle>
-            <CardDescription>
-              Latest reported incidents in your area
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RecentIncidents />
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Incidents</CardTitle>
+          <CardDescription>
+            Latest reported incidents in your area
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <RecentIncidents />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="col-span-3 md:col-span-1">
