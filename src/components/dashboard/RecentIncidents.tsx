@@ -13,6 +13,7 @@ const RecentIncidents: React.FC = () => {
   const { toast } = useToast();
 
   const handleDeleteIncident = async (incidentId: string) => {
+    console.log('Delete button clicked for incident:', incidentId);
     try {
       await deleteIncident.mutateAsync(incidentId);
       toast({
@@ -20,6 +21,7 @@ const RecentIncidents: React.FC = () => {
         description: 'The incident report has been deleted successfully.',
       });
     } catch (error) {
+      console.error('Error deleting incident:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete incident. Please try again.',
@@ -146,6 +148,7 @@ const RecentIncidents: React.FC = () => {
                   size="sm"
                   onClick={() => handleDeleteIncident(incident.id)}
                   disabled={deleteIncident.isPending}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

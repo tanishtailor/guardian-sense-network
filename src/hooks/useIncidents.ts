@@ -47,21 +47,28 @@ export const useDeleteIncident = () => {
   
   return useMutation({
     mutationFn: async (incidentId: string) => {
-      console.log('Attempting to delete incident:', incidentId);
+      console.log('Attempting to delete incident with ID:', incidentId);
+      
       const { error } = await supabase
         .from('incidents')
         .delete()
         .eq('id', incidentId);
 
       if (error) {
-        console.error('Delete error:', error);
-        throw error;
+        console.error('Delete incident error:', error);
+        throw new Error(`Failed to delete incident: ${error.message}`);
       }
-      console.log('Incident deleted successfully');
+      
+      console.log('Incident deleted successfully from database');
+      return incidentId;
     },
-    onSuccess: () => {
+    onSuccess: (deletedId) => {
+      console.log('Invalidating queries after successful delete');
       queryClient.invalidateQueries({ queryKey: ['incidents'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+    onError: (error) => {
+      console.error('Delete incident mutation error:', error);
     },
   });
 };

@@ -72,21 +72,28 @@ export const useDeleteAlert = () => {
   
   return useMutation({
     mutationFn: async (alertId: string) => {
-      console.log('Attempting to delete alert:', alertId);
+      console.log('Attempting to delete alert with ID:', alertId);
+      
       const { error } = await supabase
         .from('alerts')
         .delete()
         .eq('id', alertId);
 
       if (error) {
-        console.error('Delete error:', error);
-        throw error;
+        console.error('Delete alert error:', error);
+        throw new Error(`Failed to delete alert: ${error.message}`);
       }
-      console.log('Alert deleted successfully');
+      
+      console.log('Alert deleted successfully from database');
+      return alertId;
     },
-    onSuccess: () => {
+    onSuccess: (deletedId) => {
+      console.log('Invalidating queries after successful alert delete');
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+    onError: (error) => {
+      console.error('Delete alert mutation error:', error);
     },
   });
 };

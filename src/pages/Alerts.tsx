@@ -23,8 +23,10 @@ const Alerts: React.FC = () => {
     }
 
     try {
-      // Delete all active alerts
+      console.log('Clearing all alerts:', alerts.length);
+      // Delete all active alerts one by one
       for (const alert of alerts) {
+        console.log('Deleting alert:', alert.id);
         await deleteAlert.mutateAsync(alert.id);
       }
       toast({
@@ -32,6 +34,7 @@ const Alerts: React.FC = () => {
         description: 'All alerts have been cleared from your feed.',
       });
     } catch (error) {
+      console.error('Error clearing all alerts:', error);
       toast({
         title: 'Error',
         description: 'Failed to clear all alerts. Please try again.',
@@ -41,6 +44,7 @@ const Alerts: React.FC = () => {
   };
 
   const handleDeleteAlert = async (alertId: string) => {
+    console.log('Delete button clicked for alert:', alertId);
     try {
       await deleteAlert.mutateAsync(alertId);
       toast({
@@ -48,6 +52,7 @@ const Alerts: React.FC = () => {
         description: 'The alert has been deleted successfully.',
       });
     } catch (error) {
+      console.error('Error deleting single alert:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete alert. Please try again.',
@@ -95,7 +100,7 @@ const Alerts: React.FC = () => {
           className="mt-4 sm:mt-0"
           variant="outline"
           onClick={handleClearAll}
-          disabled={deleteAlert.isPending}
+          disabled={deleteAlert.isPending || isLoading || !alerts || alerts.length === 0}
         >
           {deleteAlert.isPending ? 'Clearing...' : 'Clear All Alerts'}
         </Button>
@@ -152,6 +157,7 @@ const Alerts: React.FC = () => {
                       size="sm"
                       onClick={() => handleDeleteAlert(alert.id)}
                       disabled={deleteAlert.isPending}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
