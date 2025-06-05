@@ -166,13 +166,13 @@ const IncidentReporting: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="p-4 bg-guardian-emergency/10 rounded-lg">
                 <h3 className="font-semibold text-guardian-emergency">Emergency Services</h3>
-                <p className="text-2xl font-bold">911</p>
+                <p className="text-2xl font-bold">102</p>
                 <p className="text-sm text-muted-foreground">For immediate life-threatening emergencies</p>
               </div>
               
               <div className="p-4 bg-guardian-info/10 rounded-lg">
                 <h3 className="font-semibold text-guardian-info">Non-Emergency Police</h3>
-                <p className="text-lg font-semibold">(415) 553-0123</p>
+                <p className="text-lg font-semibold">100</p>
                 <p className="text-sm text-muted-foreground">For non-urgent police matters</p>
               </div>
               
