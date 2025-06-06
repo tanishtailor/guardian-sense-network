@@ -3,8 +3,10 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Shield, MessageCircle, User } from 'lucide-react';
+import { Shield, MessageCircle, User, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 // Types for chat messages
 interface Message {
@@ -19,39 +21,18 @@ const EmergencyChat: React.FC = () => {
     {
       id: 1,
       sender: 'assistant',
-      text: 'Hello, I\'m the Guardian Lens Emergency Assistant. How can I help you today?',
+      text: 'Hello, I\'m the Guardian Lens Emergency Assistant powered by advanced AI. I\'m here to provide immediate guidance for emergency situations. How can I help you today? If this is a life-threatening emergency, please call 911 immediately.',
       timestamp: new Date(),
     },
   ]);
   const [newMessage, setNewMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  // Predefined responses for demo purposes
-  const getAssistantResponse = (message: string): string => {
-    const lowercaseMsg = message.toLowerCase();
-    
-    if (lowercaseMsg.includes('fire') || lowercaseMsg.includes('burning')) {
-      return 'If you\'re reporting a fire, please evacuate immediately. Stay low to avoid smoke inhalation. Call 911 if you haven\'t already. Should I provide more fire safety instructions?';
-    }
-    
-    if (lowercaseMsg.includes('medical') || lowercaseMsg.includes('hurt') || lowercaseMsg.includes('injured')) {
-      return 'For a medical emergency, try to keep the person still and comfortable. Apply direct pressure to bleeding wounds. Is the person conscious and breathing normally?';
-    }
-    
-    if (lowercaseMsg.includes('accident') || lowercaseMsg.includes('crash') || lowercaseMsg.includes('collision')) {
-      return 'For a traffic accident, ensure you\'re in a safe location away from traffic. Check for injuries and call emergency services. Can you describe the location and severity?';
-    }
-    
-    if (lowercaseMsg.includes('flood') || lowercaseMsg.includes('flooding')) {
-      return 'For flooding, move to higher ground immediately. Avoid walking or driving through floodwaters. Are you currently in a flooded area or anticipating flooding?';
-    }
-    
-    return 'I understand you need assistance. Can you provide more details about the emergency situation so I can give you the most appropriate guidance?';
-  };
-
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || isLoading) return;
     
     // Add user message
     const userMessage: Message = {
@@ -61,28 +42,57 @@ const EmergencyChat: React.FC = () => {
       timestamp: new Date(),
     };
     
-    setMessages([...messages, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
+    const currentMessage = newMessage;
     setNewMessage('');
-    
-    // Simulate assistant response after a short delay
-    setTimeout(() => {
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('emergency-chat', {
+        body: { message: currentMessage }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
+
       const assistantMessage: Message = {
         id: messages.length + 2,
         sender: 'assistant',
-        text: getAssistantResponse(userMessage.text),
+        text: data.message || 'I apologize, but I encountered an issue. Please try again or contact emergency services if urgent.',
         timestamp: new Date(),
       };
       
-      setMessages(prevMessages => [...prevMessages, assistantMessage]);
-    }, 1000);
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      toast({
+        title: "Connection Error",
+        description: "Unable to reach emergency assistant. For immediate help, call 911.",
+        variant: "destructive",
+      });
+      
+      // Add fallback message
+      const fallbackMessage: Message = {
+        id: messages.length + 2,
+        sender: 'assistant',
+        text: 'I\'m currently experiencing connectivity issues. If you\'re facing an emergency, please contact emergency services immediately at 911 (US) or your local emergency number.',
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, fallbackMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Emergency Assistant</h1>
+        <h1 className="text-3xl font-bold tracking-tight">AI Emergency Assistant</h1>
         <p className="text-muted-foreground">
-          Get immediate guidance and assistance for emergency situations.
+          Get immediate AI-powered guidance for emergency situations. Always call 911 for life-threatening emergencies.
         </p>
       </div>
       
@@ -93,7 +103,7 @@ const EmergencyChat: React.FC = () => {
             <CardTitle>Emergency Assistance Chat</CardTitle>
           </div>
           <CardDescription>
-            This AI assistant can provide guidance during emergencies. For immediate help, always call 911.
+            AI-powered emergency guidance. For immediate life-threatening situations, call 911 first.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
@@ -120,10 +130,10 @@ const EmergencyChat: React.FC = () => {
                         <User className="h-4 w-4" />
                       )}
                       <span className="text-xs font-medium">
-                        {message.sender === 'assistant' ? 'Guardian Assistant' : 'You'}
+                        {message.sender === 'assistant' ? 'Guardian AI Assistant' : 'You'}
                       </span>
                     </div>
-                    <p>{message.text}</p>
+                    <p className="whitespace-pre-wrap">{message.text}</p>
                     <p className="text-xs opacity-70 mt-1 text-right">
                       {message.timestamp.toLocaleTimeString([], {
                         hour: '2-digit',
@@ -133,6 +143,16 @@ const EmergencyChat: React.FC = () => {
                   </div>
                 </div>
               ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted">
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">Assistant is typing...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </ScrollArea>
         </CardContent>
@@ -143,9 +163,14 @@ const EmergencyChat: React.FC = () => {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               className="flex-1"
+              disabled={isLoading}
             />
-            <Button type="submit">
-              <MessageCircle className="h-4 w-4 mr-2" />
+            <Button type="submit" disabled={isLoading || !newMessage.trim()}>
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <MessageCircle className="h-4 w-4 mr-2" />
+              )}
               Send
             </Button>
           </form>

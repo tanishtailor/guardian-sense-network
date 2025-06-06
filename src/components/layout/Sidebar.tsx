@@ -10,10 +10,8 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Shield, MapPin, MessageCircle, Bell, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -68,13 +66,6 @@ const Sidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <div className="p-4">
-          <Button className="w-full emergency-button animate-pulse-emergency">
-            EMERGENCY SOS
-          </Button>
-        </div>
-      </SidebarFooter>
     </SidebarUI>
   );
 };
