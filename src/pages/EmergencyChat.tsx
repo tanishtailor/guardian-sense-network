@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,17 @@ const EmergencyChat: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollElement) {
+        scrollElement.scrollTop = scrollElement.scrollHeight;
+      }
+    }
+  }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +59,8 @@ const EmergencyChat: React.FC = () => {
     setIsLoading(true);
 
     try {
+      console.log('Sending message to emergency-chat function:', currentMessage);
+      
       const { data, error } = await supabase.functions.invoke('emergency-chat', {
         body: { message: currentMessage }
       });
@@ -57,6 +70,8 @@ const EmergencyChat: React.FC = () => {
         throw error;
       }
 
+      console.log('Received response from emergency-chat function:', data);
+
       const assistantMessage: Message = {
         id: messages.length + 2,
         sender: 'assistant',
@@ -65,6 +80,11 @@ const EmergencyChat: React.FC = () => {
       };
       
       setMessages(prev => [...prev, assistantMessage]);
+      
+      toast({
+        title: "Response received",
+        description: "Emergency assistant has responded to your query.",
+      });
     } catch (error) {
       console.error('Chat error:', error);
       toast({
@@ -87,6 +107,10 @@ const EmergencyChat: React.FC = () => {
     }
   };
 
+  const handleQuickQuestion = (question: string) => {
+    setNewMessage(question);
+  };
+
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
@@ -107,7 +131,7 @@ const EmergencyChat: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[50vh] p-4">
+          <ScrollArea className="h-[50vh] p-4" ref={scrollAreaRef}>
             <div className="space-y-4">
               {messages.map((message) => (
                 <div
@@ -148,7 +172,7 @@ const EmergencyChat: React.FC = () => {
                   <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted">
                     <div className="flex items-center space-x-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">Assistant is typing...</span>
+                      <span className="text-sm">Assistant is analyzing your emergency...</span>
                     </div>
                   </div>
                 </div>
@@ -169,9 +193,11 @@ const EmergencyChat: React.FC = () => {
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <MessageCircle className="h-4 w-4 mr-2" />
+                <>
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Send
+                </>
               )}
-              Send
             </Button>
           </form>
         </CardFooter>
@@ -183,13 +209,25 @@ const EmergencyChat: React.FC = () => {
             <CardTitle className="text-sm">First Aid</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button variant="link" className="p-0 h-auto text-left justify-start">
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-left justify-start block"
+              onClick={() => handleQuickQuestion("How do I perform CPR?")}
+            >
               CPR Instructions
             </Button>
-            <Button variant="link" className="p-0 h-auto text-left justify-start">
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-left justify-start block"
+              onClick={() => handleQuickQuestion("How do I stop severe bleeding?")}
+            >
               Stopping Bleeding
             </Button>
-            <Button variant="link" className="p-0 h-auto text-left justify-start">
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-left justify-start block"
+              onClick={() => handleQuickQuestion("How do I treat burns?")}
+            >
               Treating Burns
             </Button>
           </CardContent>
@@ -200,13 +238,25 @@ const EmergencyChat: React.FC = () => {
             <CardTitle className="text-sm">Natural Disasters</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button variant="link" className="p-0 h-auto text-left justify-start">
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-left justify-start block"
+              onClick={() => handleQuickQuestion("What should I do during an earthquake?")}
+            >
               Earthquake Safety
             </Button>
-            <Button variant="link" className="p-0 h-auto text-left justify-start">
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-left justify-start block"
+              onClick={() => handleQuickQuestion("How do I evacuate during a flood?")}
+            >
               Flood Evacuation
             </Button>
-            <Button variant="link" className="p-0 h-auto text-left justify-start">
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-left justify-start block"
+              onClick={() => handleQuickQuestion("How do I prepare for a hurricane?")}
+            >
               Hurricane Preparation
             </Button>
           </CardContent>
@@ -217,13 +267,25 @@ const EmergencyChat: React.FC = () => {
             <CardTitle className="text-sm">Personal Safety</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button variant="link" className="p-0 h-auto text-left justify-start">
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-left justify-start block"
+              onClick={() => handleQuickQuestion("What are some home security tips?")}
+            >
               Home Security Tips
             </Button>
-            <Button variant="link" className="p-0 h-auto text-left justify-start">
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-left justify-start block"
+              onClick={() => handleQuickQuestion("How can I stay safe while traveling?")}
+            >
               Travel Safety
             </Button>
-            <Button variant="link" className="p-0 h-auto text-left justify-start">
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-left justify-start block"
+              onClick={() => handleQuickQuestion("What are basic self-defense techniques?")}
+            >
               Self-Defense Basics
             </Button>
           </CardContent>
