@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -229,7 +228,7 @@ const EmergencyChat: React.FC = () => {
             </div>
           </ScrollArea>
         </CardContent>
-        <CardFooter className="border-t p-4 space-y-4">
+        <CardFooter className="border-t p-4">
           <form onSubmit={handleSendMessage} className="w-full flex space-x-2">
             <Input
               placeholder="Describe your emergency situation..."
@@ -249,29 +248,6 @@ const EmergencyChat: React.FC = () => {
               )}
             </Button>
           </form>
-          
-          {/* Quick Suggestions */}
-          <div className="w-full">
-            <p className="text-sm text-muted-foreground mb-2">Quick suggestions:</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {quickSuggestions.map((suggestion, index) => {
-                const IconComponent = suggestion.icon;
-                return (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    size="sm"
-                    className="text-left justify-start h-auto p-2 text-xs"
-                    onClick={() => handleSuggestionClick(suggestion.text)}
-                    disabled={isLoading}
-                  >
-                    <IconComponent className="h-3 w-3 mr-1 flex-shrink-0" />
-                    <span className="truncate">{suggestion.text}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
         </CardFooter>
       </Card>
       
