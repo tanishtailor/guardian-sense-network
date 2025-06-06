@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 const Alerts: React.FC = () => {
   const { toast } = useToast();
   const { data: alerts, isLoading, error } = useAlerts();
-  const deleteAlert = useDeleteAlert();
+  const deleteAlertMutation = useDeleteAlert();
   
   const handleClearAll = async () => {
     if (!alerts || alerts.length === 0) {
@@ -27,7 +27,7 @@ const Alerts: React.FC = () => {
       // Delete all active alerts one by one
       for (const alert of alerts) {
         console.log('Deleting alert:', alert.id);
-        await deleteAlert.mutateAsync(alert.id);
+        await deleteAlertMutation.mutateAsync(alert.id);
       }
       toast({
         title: 'All Alerts Cleared',
@@ -46,7 +46,7 @@ const Alerts: React.FC = () => {
   const handleDeleteAlert = async (alertId: string) => {
     console.log('Delete button clicked for alert:', alertId);
     try {
-      await deleteAlert.mutateAsync(alertId);
+      await deleteAlertMutation.mutateAsync(alertId);
       toast({
         title: 'Alert Deleted',
         description: 'The alert has been deleted successfully.',
@@ -100,9 +100,9 @@ const Alerts: React.FC = () => {
           className="mt-4 sm:mt-0"
           variant="outline"
           onClick={handleClearAll}
-          disabled={deleteAlert.isPending || isLoading || !alerts || alerts.length === 0}
+          disabled={deleteAlertMutation.isPending || isLoading || !alerts || alerts.length === 0}
         >
-          {deleteAlert.isPending ? 'Clearing...' : 'Clear All Alerts'}
+          {deleteAlertMutation.isPending ? 'Clearing...' : 'Clear All Alerts'}
         </Button>
       </div>
 
@@ -156,7 +156,7 @@ const Alerts: React.FC = () => {
                       variant="ghost" 
                       size="sm"
                       onClick={() => handleDeleteAlert(alert.id)}
-                      disabled={deleteAlert.isPending}
+                      disabled={deleteAlertMutation.isPending}
                       className="text-red-500 hover:text-red-700 hover:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4" />

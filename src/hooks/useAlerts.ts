@@ -10,13 +10,18 @@ export const useAlerts = () => {
   return useQuery({
     queryKey: ['alerts'],
     queryFn: async () => {
+      console.log('Fetching alerts...');
       const { data, error } = await supabase
         .from('alerts')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching alerts:', error);
+        throw error;
+      }
+      console.log('Fetched alerts:', data);
       return data as Alert[];
     },
   });
@@ -74,9 +79,10 @@ export const useDeleteAlert = () => {
     mutationFn: async (alertId: string) => {
       console.log('Attempting to delete alert with ID:', alertId);
       
+      // First, let's try to update the alert to set is_active to false instead of deleting
       const { error } = await supabase
         .from('alerts')
-        .delete()
+        .update({ is_active: false })
         .eq('id', alertId);
 
       if (error) {
@@ -84,7 +90,7 @@ export const useDeleteAlert = () => {
         throw new Error(`Failed to delete alert: ${error.message}`);
       }
       
-      console.log('Alert deleted successfully from database');
+      console.log('Alert deleted successfully (set to inactive)');
       return alertId;
     },
     onSuccess: (deletedId) => {
