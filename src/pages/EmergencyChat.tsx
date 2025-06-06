@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Shield, MessageCircle, User, Loader2 } from 'lucide-react';
+import { Shield, MessageCircle, User, Loader2, Heart, Home, Car } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -107,6 +107,55 @@ const EmergencyChat: React.FC = () => {
     }
   };
 
+  const handleSuggestionClick = (suggestion: string) => {
+    setNewMessage(suggestion);
+    // Auto-submit the suggestion
+    const syntheticEvent = {
+      preventDefault: () => {},
+    } as React.FormEvent;
+    
+    // Set the message and trigger send
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) {
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      }
+    }, 100);
+  };
+
+  const quickSuggestions = [
+    {
+      text: "How do I perform CPR?",
+      icon: Heart,
+      category: "Medical Emergency"
+    },
+    {
+      text: "What should I do during an earthquake?",
+      icon: Home,
+      category: "Natural Disaster"
+    },
+    {
+      text: "How do I stop severe bleeding?",
+      icon: Heart,
+      category: "Medical Emergency"
+    },
+    {
+      text: "What are basic self-defense techniques?",
+      icon: Shield,
+      category: "Personal Safety"
+    },
+    {
+      text: "How do I evacuate during a flood?",
+      icon: Car,
+      category: "Natural Disaster"
+    },
+    {
+      text: "How do I treat burns?",
+      icon: Heart,
+      category: "Medical Emergency"
+    }
+  ];
+
   const handleQuickQuestion = (question: string) => {
     setNewMessage(question);
   };
@@ -180,7 +229,7 @@ const EmergencyChat: React.FC = () => {
             </div>
           </ScrollArea>
         </CardContent>
-        <CardFooter className="border-t p-4">
+        <CardFooter className="border-t p-4 space-y-4">
           <form onSubmit={handleSendMessage} className="w-full flex space-x-2">
             <Input
               placeholder="Describe your emergency situation..."
@@ -200,6 +249,29 @@ const EmergencyChat: React.FC = () => {
               )}
             </Button>
           </form>
+          
+          {/* Quick Suggestions */}
+          <div className="w-full">
+            <p className="text-sm text-muted-foreground mb-2">Quick suggestions:</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {quickSuggestions.map((suggestion, index) => {
+                const IconComponent = suggestion.icon;
+                return (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    className="text-left justify-start h-auto p-2 text-xs"
+                    onClick={() => handleSuggestionClick(suggestion.text)}
+                    disabled={isLoading}
+                  >
+                    <IconComponent className="h-3 w-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">{suggestion.text}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
         </CardFooter>
       </Card>
       
