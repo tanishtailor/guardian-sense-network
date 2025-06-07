@@ -25,7 +25,6 @@ export const useDashboardStats = () => {
       return {
         activeIncidents: activeIncidents.length,
         activeAlerts: activeAlerts.length,
-        safeZones: 18, // This could be from another table in the future
       };
     },
   });
