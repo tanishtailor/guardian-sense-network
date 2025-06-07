@@ -92,29 +92,41 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age: number | null
+          allergies: string | null
           created_at: string | null
           email: string | null
           emergency_contact: string | null
           full_name: string | null
+          gender: string | null
           id: string
+          medical_problems: string | null
           phone: string | null
           updated_at: string | null
         }
         Insert: {
+          age?: number | null
+          allergies?: string | null
           created_at?: string | null
           email?: string | null
           emergency_contact?: string | null
           full_name?: string | null
+          gender?: string | null
           id: string
+          medical_problems?: string | null
           phone?: string | null
           updated_at?: string | null
         }
         Update: {
+          age?: number | null
+          allergies?: string | null
           created_at?: string | null
           email?: string | null
           emergency_contact?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
+          medical_problems?: string | null
           phone?: string | null
           updated_at?: string | null
         }
@@ -129,6 +141,7 @@ export type Database = {
     }
     Enums: {
       alert_priority: "low" | "medium" | "high" | "critical"
+      gender_type: "male" | "female" | "other" | "prefer_not_to_say"
       incident_status: "active" | "responding" | "monitoring" | "resolved"
       incident_type:
         | "fire"
@@ -253,6 +266,7 @@ export const Constants = {
   public: {
     Enums: {
       alert_priority: ["low", "medium", "high", "critical"],
+      gender_type: ["male", "female", "other", "prefer_not_to_say"],
       incident_status: ["active", "responding", "monitoring", "resolved"],
       incident_type: [
         "fire",

@@ -12,6 +12,7 @@ import SafetyMap from "./pages/SafetyMap";
 import IncidentReporting from "./pages/IncidentReporting";
 import EmergencyChat from "./pages/EmergencyChat";
 import Alerts from "./pages/Alerts";
+import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/report" element={<IncidentReporting />} />
               <Route path="/chat" element={<EmergencyChat />} />
               <Route path="/alerts" element={<Alerts />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
