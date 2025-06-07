@@ -1,19 +1,55 @@
 
-import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, Phone, AlertTriangle } from 'lucide-react';
 import { useNearbyHospitals } from '@/hooks/useNearbyHospitals';
 
+// Fix for default markers in react-leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Custom icons
+const userIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+const hospitalIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
 interface MapProps {
   className?: string;
 }
 
+const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    map.setView(center, 12);
+  }, [center, map]);
+  
+  return null;
+};
+
 const Map: React.FC<MapProps> = ({ className }) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { data: hospitals, isLoading } = useNearbyHospitals(userLocation?.lat, userLocation?.lng);
 
@@ -41,85 +77,20 @@ const Map: React.FC<MapProps> = ({ className }) => {
     getCurrentLocation();
   }, []);
 
-  useEffect(() => {
-    if (!mapContainer.current || !userLocation) return;
-
-    // Initialize map with a free map style (no token required)
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: {
-        version: 8,
-        sources: {
-          'raster-tiles': {
-            type: 'raster',
-            tiles: [
-              'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-            ],
-            tileSize: 256,
-            attribution: '© OpenStreetMap contributors'
-          }
-        },
-        layers: [
-          {
-            id: 'simple-tiles',
-            type: 'raster',
-            source: 'raster-tiles',
-            minzoom: 0,
-            maxzoom: 22
-          }
-        ]
-      },
-      center: [userLocation.lng, userLocation.lat],
-      zoom: 12
-    });
-
-    // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-    // Add user location marker
-    new mapboxgl.Marker({ color: 'blue' })
-      .setLngLat([userLocation.lng, userLocation.lat])
-      .setPopup(new mapboxgl.Popup().setHTML('<h4>Your Location</h4>'))
-      .addTo(map.current);
-
-    // Cleanup
-    return () => {
-      map.current?.remove();
-    };
-  }, [userLocation]);
-
-  // Add hospital markers when hospitals data is available
-  useEffect(() => {
-    if (!map.current || !hospitals) return;
-
-    hospitals.forEach((hospital) => {
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-        <div class="p-2">
-          <h4 class="font-semibold text-sm">${hospital.name}</h4>
-          <p class="text-xs text-gray-600 mb-2">${hospital.address}</p>
-          <div class="space-y-1">
-            <div class="flex items-center text-xs">
-              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-              </svg>
-              ${hospital.phone}
+  if (!userLocation) {
+    return (
+      <div className={className}>
+        <Card>
+          <CardContent className="flex items-center justify-center h-[500px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+              <p>Getting your location...</p>
             </div>
-            <div class="flex items-center text-xs text-red-600">
-              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-              </svg>
-              Emergency: ${hospital.emergency}
-            </div>
-          </div>
-        </div>
-      `);
-
-      new mapboxgl.Marker({ color: 'red' })
-        .setLngLat([hospital.longitude, hospital.latitude])
-        .setPopup(popup)
-        .addTo(map.current!);
-    });
-  }, [hospitals]);
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className={className}>
@@ -136,7 +107,55 @@ const Map: React.FC<MapProps> = ({ className }) => {
               </div>
             </CardHeader>
             <CardContent>
-              <div ref={mapContainer} className="w-full h-[500px] rounded-lg" />
+              <div className="w-full h-[500px] rounded-lg overflow-hidden">
+                <MapContainer
+                  center={[userLocation.lat, userLocation.lng]}
+                  zoom={12}
+                  style={{ height: '100%', width: '100%' }}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  
+                  <MapUpdater center={[userLocation.lat, userLocation.lng]} />
+                  
+                  <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
+                    <Popup>
+                      <div className="text-center">
+                        <h4 className="font-semibold">Your Location</h4>
+                      </div>
+                    </Popup>
+                  </Marker>
+
+                  {hospitals?.map((hospital) => (
+                    <Marker
+                      key={hospital.id}
+                      position={[hospital.latitude, hospital.longitude]}
+                      icon={hospitalIcon}
+                    >
+                      <Popup>
+                        <div className="p-2 min-w-[200px]">
+                          <h4 className="font-semibold text-sm mb-2">{hospital.name}</h4>
+                          <p className="text-xs text-gray-600 mb-2">{hospital.address}</p>
+                          <div className="space-y-1">
+                            <div className="flex items-center text-xs">
+                              <Phone className="w-3 h-3 mr-1" />
+                              <a href={`tel:${hospital.phone}`} className="text-blue-600 hover:underline">
+                                {hospital.phone}
+                              </a>
+                            </div>
+                            <div className="flex items-center text-xs text-red-600">
+                              <AlertTriangle className="w-3 h-3 mr-1" />
+                              Emergency: {hospital.emergency}
+                            </div>
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -148,7 +167,10 @@ const Map: React.FC<MapProps> = ({ className }) => {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="text-center py-4">Loading hospitals...</div>
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto mb-2"></div>
+                  Loading hospitals...
+                </div>
               ) : hospitals && hospitals.length > 0 ? (
                 <div className="space-y-4">
                   {hospitals.slice(0, 5).map((hospital) => (
