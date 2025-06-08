@@ -20,6 +20,8 @@ const Map: React.FC<MapProps> = ({ className }) => {
     if (!locationInput.trim()) return;
 
     try {
+      console.log('Searching for location:', locationInput);
+      
       // Use a geocoding service to convert address to coordinates
       // For demo purposes, we'll use a mock implementation
       // In a real app, you'd use a geocoding API like OpenCage or Google Geocoding
@@ -30,6 +32,7 @@ const Map: React.FC<MapProps> = ({ className }) => {
         lng: -122.4194 + (Math.random() - 0.5) * 0.1
       };
       
+      console.log('Generated coordinates:', mockCoordinates);
       setSearchLocation(mockCoordinates);
     } catch (error) {
       console.error('Error geocoding location:', error);
@@ -69,8 +72,8 @@ const Map: React.FC<MapProps> = ({ className }) => {
 
         {/* Hospital Results */}
         {searchLocation && (
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="md:col-span-1">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="lg:col-span-1">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -84,11 +87,17 @@ const Map: React.FC<MapProps> = ({ className }) => {
                   <p className="text-xs text-muted-foreground mt-1">
                     Coordinates: {searchLocation.lat.toFixed(4)}, {searchLocation.lng.toFixed(4)}
                   </p>
+                  {isLoading && (
+                    <div className="mt-4 flex items-center text-sm text-muted-foreground">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
+                      Searching for nearby hospitals...
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
 
-            <div className="md:col-span-1">
+            <div className="lg:col-span-1">
               <HospitalsList hospitals={hospitals} isLoading={isLoading} />
             </div>
           </div>
