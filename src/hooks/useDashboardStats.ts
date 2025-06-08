@@ -14,17 +14,8 @@ export const useDashboardStats = () => {
 
       if (incidentsError) throw incidentsError;
 
-      // Get active alerts count
-      const { data: activeAlerts, error: alertsError } = await supabase
-        .from('alerts')
-        .select('id')
-        .eq('is_active', true);
-
-      if (alertsError) throw alertsError;
-
       return {
         activeIncidents: activeIncidents.length,
-        activeAlerts: activeAlerts.length,
       };
     },
   });

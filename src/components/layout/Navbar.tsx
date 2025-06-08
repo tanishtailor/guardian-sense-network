@@ -2,10 +2,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Bell, User, LogOut } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAlerts } from '@/hooks/useAlerts';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,10 +14,6 @@ import {
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
-  const { data: alerts } = useAlerts();
-
-  // Count active alerts
-  const activeAlertsCount = alerts?.length || 0;
 
   const handleSignOut = async () => {
     await signOut();
@@ -39,17 +34,6 @@ const Navbar: React.FC = () => {
           </Link>
         </div>
         <div className="ml-auto flex items-center space-x-4">
-          <Link to="/alerts">
-            <Button variant="outline" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              {activeAlertsCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-guardian-emergency text-[10px] text-white">
-                  {activeAlertsCount > 9 ? '9+' : activeAlertsCount}
-                </span>
-              )}
-            </Button>
-          </Link>
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">

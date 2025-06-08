@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
-import { Shield, MapPin, MessageCircle, Bell, Plus, User } from 'lucide-react';
+import { Shield, MapPin, MessageCircle, Plus, User } from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -37,11 +37,6 @@ const Sidebar = () => {
       title: 'Emergency Chat',
       url: '/chat',
       icon: MessageCircle,
-    },
-    {
-      title: 'Alerts',
-      url: '/alerts',
-      icon: Bell,
     },
     {
       title: 'Profile',
