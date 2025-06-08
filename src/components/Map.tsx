@@ -1,11 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { MapPin, Search } from 'lucide-react';
 import { useNearbyHospitals } from '@/hooks/useNearbyHospitals';
-import { useUserLocation } from '@/hooks/useUserLocation';
-import InteractiveMapContainer from './map/MapContainer';
 import HospitalsList from './map/HospitalsList';
 
 interface MapProps {
@@ -13,47 +12,100 @@ interface MapProps {
 }
 
 const Map: React.FC<MapProps> = ({ className }) => {
-  const { userLocation, getCurrentLocation } = useUserLocation();
-  const { data: hospitals, isLoading } = useNearbyHospitals(userLocation?.lat, userLocation?.lng);
+  const [locationInput, setLocationInput] = useState('');
+  const [searchLocation, setSearchLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const { data: hospitals, isLoading } = useNearbyHospitals(searchLocation?.lat, searchLocation?.lng);
 
-  if (!userLocation) {
-    return (
-      <div className={className}>
-        <Card>
-          <CardContent className="flex items-center justify-center h-[500px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-              <p>Getting your location...</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const handleLocationSearch = async () => {
+    if (!locationInput.trim()) return;
+
+    try {
+      // Use a geocoding service to convert address to coordinates
+      // For demo purposes, we'll use a mock implementation
+      // In a real app, you'd use a geocoding API like OpenCage or Google Geocoding
+      
+      // Mock geocoding - in reality you'd call an API
+      const mockCoordinates = {
+        lat: 37.7749 + (Math.random() - 0.5) * 0.1, // Random coordinates around SF
+        lng: -122.4194 + (Math.random() - 0.5) * 0.1
+      };
+      
+      setSearchLocation(mockCoordinates);
+    } catch (error) {
+      console.error('Error geocoding location:', error);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleLocationSearch();
+    }
+  };
 
   return (
     <div className={className}>
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="md:col-span-2">
+      <div className="space-y-6">
+        {/* Location Search */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Find Nearby Hospitals</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter your location (e.g., San Francisco, CA)"
+                value={locationInput}
+                onChange={(e) => setLocationInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="flex-1"
+              />
+              <Button onClick={handleLocationSearch} disabled={!locationInput.trim()}>
+                <Search className="h-4 w-4 mr-2" />
+                Search
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Hospital Results */}
+        {searchLocation && (
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="md:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <MapPin className="h-5 w-5 mr-2" />
+                    Search Location
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-2">Searching near:</p>
+                  <p className="font-medium">{locationInput}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Coordinates: {searchLocation.lat.toFixed(4)}, {searchLocation.lng.toFixed(4)}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="md:col-span-1">
+              <HospitalsList hospitals={hospitals} isLoading={isLoading} />
+            </div>
+          </div>
+        )}
+
+        {/* Instructions when no search has been made */}
+        {!searchLocation && (
           <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Interactive Safety Map</CardTitle>
-                <Button onClick={getCurrentLocation} variant="outline" size="sm">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Update Location
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <InteractiveMapContainer userLocation={userLocation} hospitals={hospitals} />
+            <CardContent className="text-center py-8">
+              <MapPin className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-medium mb-2">Enter Your Location</h3>
+              <p className="text-muted-foreground">
+                Type your address, city, or area name above to find nearby hospitals with contact information.
+              </p>
             </CardContent>
           </Card>
-        </div>
-
-        <div>
-          <HospitalsList hospitals={hospitals} isLoading={isLoading} />
-        </div>
+        )}
       </div>
     </div>
   );
