@@ -86,8 +86,8 @@ const Dashboard: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-start">
-                <div className="bg-guardian-info/10 p-2 rounded-full mr-4">
-                  <Shield className="h-5 w-5 text-guardian-info" />
+                <div className="bg-blue-100 p-2 rounded-full mr-4">
+                  <Shield className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
                   <h4 className="font-semibold">Emergency Preparedness</h4>
@@ -97,8 +97,8 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="bg-guardian-warning/10 p-2 rounded-full mr-4">
-                  <MessageCircle className="h-5 w-5 text-guardian-warning" />
+                <div className="bg-yellow-100 p-2 rounded-full mr-4">
+                  <MessageCircle className="h-5 w-5 text-yellow-600" />
                 </div>
                 <div>
                   <h4 className="font-semibold">Emergency Communication</h4>
@@ -108,8 +108,8 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="bg-guardian-success/10 p-2 rounded-full mr-4">
-                  <MapPin className="h-5 w-5 text-guardian-success" />
+                <div className="bg-green-100 p-2 rounded-full mr-4">
+                  <MapPin className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
                   <h4 className="font-semibold">Know Your Area</h4>
