@@ -20,7 +20,7 @@ const Dashboard: React.FC = () => {
           </p>
         </div>
         <Link to="/report">
-          <Button className="mt-4 sm:mt-0 bg-guardian-emergency hover:bg-red-700">
+          <Button className="mt-4 sm:mt-0 bg-red-600 hover:bg-red-700">
             Report Incident
           </Button>
         </Link>
@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Incidents</CardTitle>
-            <Shield className="h-4 w-4 text-guardian-emergency" />
+            <Shield className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">

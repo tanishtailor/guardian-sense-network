@@ -25,9 +25,9 @@ const Navbar: React.FC = () => {
         <SidebarTrigger />
         <div className="ml-4 flex items-center">
           <Link to="/" className="flex items-center">
-            <div className="rounded-full bg-guardian-info p-1.5 mr-2">
+            <div className="rounded-full bg-blue-600 p-1.5 mr-2">
               <div className="rounded-full bg-white p-1">
-                <div className="rounded-full bg-guardian-info w-4 h-4"></div>
+                <div className="rounded-full bg-blue-600 w-4 h-4"></div>
               </div>
             </div>
             <span className="text-xl font-bold text-primary">Guardian Lens</span>
