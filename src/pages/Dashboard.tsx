@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Shield, AlertTriangle, MessageCircle, MapPin, Bell } from 'lucide-react';
+import { Shield, MessageCircle, MapPin } from 'lucide-react';
 import RecentIncidents from '@/components/dashboard/RecentIncidents';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 
@@ -26,7 +26,7 @@ const Dashboard: React.FC = () => {
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-1">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Incidents</CardTitle>
@@ -38,20 +38,6 @@ const Dashboard: React.FC = () => {
             </div>
             <p className="text-xs text-muted-foreground">
               Currently being handled
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Safety Alerts</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-guardian-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? '...' : stats?.activeAlerts || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Active in your area
             </p>
           </CardContent>
         </Card>
@@ -87,12 +73,6 @@ const Dashboard: React.FC = () => {
                 Emergency Assistance
               </Button>
             </Link>
-            <Link to="/alerts">
-              <Button className="w-full text-left justify-start" variant="outline">
-                <Bell className="h-4 w-4 mr-2" />
-                Manage Alerts
-              </Button>
-            </Link>
           </CardContent>
         </Card>
 
@@ -118,12 +98,12 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="flex items-start">
                 <div className="bg-guardian-warning/10 p-2 rounded-full mr-4">
-                  <AlertTriangle className="h-5 w-5 text-guardian-warning" />
+                  <MessageCircle className="h-5 w-5 text-guardian-warning" />
                 </div>
                 <div>
-                  <h4 className="font-semibold">Natural Disaster Response</h4>
+                  <h4 className="font-semibold">Emergency Communication</h4>
                   <p className="text-sm text-muted-foreground">
-                    Identify safe locations in your home and community for different types of disasters.
+                    Use the emergency chat feature to get immediate assistance from trained professionals.
                   </p>
                 </div>
               </div>
@@ -132,9 +112,9 @@ const Dashboard: React.FC = () => {
                   <MapPin className="h-5 w-5 text-guardian-success" />
                 </div>
                 <div>
-                  <h4 className="font-semibold">Location Sharing</h4>
+                  <h4 className="font-semibold">Know Your Area</h4>
                   <p className="text-sm text-muted-foreground">
-                    Share your location with trusted contacts during emergencies or when in unfamiliar areas.
+                    Familiarize yourself with nearby hospitals and emergency services in your neighborhood.
                   </p>
                 </div>
               </div>

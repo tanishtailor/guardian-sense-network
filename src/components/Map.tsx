@@ -22,10 +22,6 @@ const Map: React.FC<MapProps> = ({ className }) => {
     try {
       console.log('Searching for location:', locationInput);
       
-      // Use a geocoding service to convert address to coordinates
-      // For demo purposes, we'll use a mock implementation
-      // In a real app, you'd use a geocoding API like OpenCage or Google Geocoding
-      
       // Mock geocoding - in reality you'd call an API
       const mockCoordinates = {
         lat: 37.7749 + (Math.random() - 0.5) * 0.1, // Random coordinates around SF
@@ -56,7 +52,7 @@ const Map: React.FC<MapProps> = ({ className }) => {
           <CardContent>
             <div className="flex gap-2">
               <Input
-                placeholder="Enter your location (e.g., San Francisco, CA)"
+                placeholder="Enter your address (e.g., 123 Main St, San Francisco, CA)"
                 value={locationInput}
                 onChange={(e) => setLocationInput(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -84,9 +80,6 @@ const Map: React.FC<MapProps> = ({ className }) => {
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-2">Searching near:</p>
                   <p className="font-medium">{locationInput}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Coordinates: {searchLocation.lat.toFixed(4)}, {searchLocation.lng.toFixed(4)}
-                  </p>
                   {isLoading && (
                     <div className="mt-4 flex items-center text-sm text-muted-foreground">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
@@ -108,9 +101,9 @@ const Map: React.FC<MapProps> = ({ className }) => {
           <Card>
             <CardContent className="text-center py-8">
               <MapPin className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-medium mb-2">Enter Your Location</h3>
+              <h3 className="text-lg font-medium mb-2">Enter Your Address</h3>
               <p className="text-muted-foreground">
-                Type your address, city, or area name above to find nearby hospitals with contact information.
+                Type your complete address above to find nearby hospitals with contact information.
               </p>
             </CardContent>
           </Card>
