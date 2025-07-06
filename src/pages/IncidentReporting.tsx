@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,14 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, AlertTriangle, Phone, Clock } from 'lucide-react';
+import { Phone, Clock, AlertTriangle } from 'lucide-react';
 import { useCreateIncident } from '@/hooks/useIncidents';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import SymptomSelector from '@/components/incident/SymptomSelector';
 import HospitalMatcher from '@/components/incident/HospitalMatcher';
-import PatientInfo from '@/components/incident/PatientInfo';
+import LocationDetector from '@/components/incident/LocationDetector';
+import PatientDetailsForm from '@/components/incident/PatientDetailsForm';
 
 const IncidentReporting: React.FC = () => {
   const { user } = useAuth();
@@ -25,7 +27,21 @@ const IncidentReporting: React.FC = () => {
     description: '',
     incident_type: '',
     location_address: '',
+    location_lat: null as number | null,
+    location_lng: null as number | null,
   });
+
+  const [patientDetails, setPatientDetails] = useState({
+    patient_name: '',
+    patient_age: '',
+    patient_gender: '',
+    patient_phone: '',
+    patient_emergency_contact: '',
+    patient_medical_conditions: '',
+    patient_allergies: '',
+    auto_filled_from_profile: false,
+  });
+
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [dispatchedHospital, setDispatchedHospital] = useState<any>(null);
 
@@ -41,10 +57,10 @@ const IncidentReporting: React.FC = () => {
       return;
     }
 
-    if (!formData.title || !formData.incident_type) {
+    if (!formData.title || !formData.incident_type || !patientDetails.patient_name || !patientDetails.patient_age) {
       toast({
         title: 'Error',
-        description: 'Please fill in all required fields.',
+        description: 'Please fill in all required fields including patient information.',
         variant: 'destructive',
       });
       return;
@@ -53,18 +69,20 @@ const IncidentReporting: React.FC = () => {
     try {
       const incidentData = {
         ...formData,
+        ...patientDetails,
+        patient_age: parseInt(patientDetails.patient_age) || null,
         user_id: user.id,
         incident_type: formData.incident_type as any,
-        description: `${formData.description}\n\nSymptoms: ${selectedSymptoms.join(', ')}\n\nPatient Info: ${profile?.full_name || 'Unknown'}, Age: ${profile?.age || 'Unknown'}\nMedical Conditions: ${profile?.medical_problems || 'None reported'}\nAllergies: ${profile?.allergies || 'None reported'}${dispatchedHospital ? `\n\nAmbulance dispatched from: ${dispatchedHospital.name}` : ''}`,
+        description: `${formData.description}\n\nSymptoms: ${selectedSymptoms.join(', ')}\n\nPatient: ${patientDetails.patient_name}, Age: ${patientDetails.patient_age}, Gender: ${patientDetails.patient_gender}\nPhone: ${patientDetails.patient_phone}\nEmergency Contact: ${patientDetails.patient_emergency_contact}\nMedical Conditions: ${patientDetails.patient_medical_conditions || 'None reported'}\nAllergies: ${patientDetails.patient_allergies || 'None reported'}${dispatchedHospital ? `\n\nAmbulance dispatched from: ${dispatchedHospital.name}` : ''}`,
       };
 
       await createIncident.mutateAsync(incidentData);
 
       toast({
-        title: 'Incident Reported',
+        title: 'Emergency Reported',
         description: dispatchedHospital 
-          ? `Incident reported and ambulance dispatched from ${dispatchedHospital.name}.`
-          : 'Your incident report has been submitted successfully.',
+          ? `Emergency reported successfully! Ambulance dispatched from ${dispatchedHospital.name}. Call 112 for immediate assistance.`
+          : 'Your emergency report has been submitted successfully. Call 112 for immediate assistance.',
       });
 
       // Reset form
@@ -73,13 +91,25 @@ const IncidentReporting: React.FC = () => {
         description: '',
         incident_type: '',
         location_address: '',
+        location_lat: null,
+        location_lng: null,
+      });
+      setPatientDetails({
+        patient_name: '',
+        patient_age: '',
+        patient_gender: '',
+        patient_phone: '',
+        patient_emergency_contact: '',
+        patient_medical_conditions: '',
+        patient_allergies: '',
+        auto_filled_from_profile: false,
       });
       setSelectedSymptoms([]);
       setDispatchedHospital(null);
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to submit incident report. Please try again.',
+        description: 'Failed to submit emergency report. Please try again or call 112 immediately.',
         variant: 'destructive',
       });
     }
@@ -89,6 +119,15 @@ const IncidentReporting: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleLocationChange = (address: string, lat?: number, lng?: number) => {
+    setFormData(prev => ({
+      ...prev,
+      location_address: address,
+      location_lat: lat || null,
+      location_lng: lng || null,
+    }));
+  };
+
   const handleAmbulanceDispatch = (hospital: any) => {
     setDispatchedHospital(hospital);
   };
@@ -96,9 +135,9 @@ const IncidentReporting: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Report an Emergency</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-red-600">Report an Emergency</h1>
         <p className="text-muted-foreground">
-          Provide incident details and get matched with the right medical facility.
+          Provide incident and patient details to get immediate medical assistance. Call 112 for life-threatening emergencies.
         </p>
       </div>
 
@@ -106,15 +145,15 @@ const IncidentReporting: React.FC = () => {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Incident Details</CardTitle>
+              <CardTitle>Emergency Details</CardTitle>
               <CardDescription>
-                Provide as much detail as possible about the emergency.
+                Provide as much detail as possible about the emergency situation.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="title">Incident Title *</Label>
+                  <Label htmlFor="title">Emergency Title *</Label>
                   <Input
                     id="title"
                     value={formData.title}
@@ -141,15 +180,10 @@ const IncidentReporting: React.FC = () => {
                   </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={formData.location_address}
-                    onChange={(e) => handleInputChange('location_address', e.target.value)}
-                    placeholder="Street address or nearby landmark"
-                  />
-                </div>
+                <LocationDetector
+                  onLocationChange={handleLocationChange}
+                  initialAddress={formData.location_address}
+                />
 
                 <div>
                   <Label htmlFor="description">Additional Details</Label>
@@ -168,11 +202,17 @@ const IncidentReporting: React.FC = () => {
                   disabled={createIncident.isPending}
                 >
                   {createIncident.isPending ? 'Submitting...' : 
-                    dispatchedHospital ? 'Submit Report with Ambulance Dispatch' : 'Report Emergency'}
+                    dispatchedHospital ? 'Submit Emergency Report with Ambulance' : 'Report Emergency'}
                 </Button>
               </form>
             </CardContent>
           </Card>
+
+          <PatientDetailsForm
+            patientDetails={patientDetails}
+            onPatientDetailsChange={setPatientDetails}
+            userProfile={profile}
+          />
 
           <SymptomSelector 
             selectedSymptoms={selectedSymptoms}
@@ -181,8 +221,6 @@ const IncidentReporting: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          <PatientInfo profile={profile} />
-
           <HospitalMatcher 
             symptoms={selectedSymptoms}
             userLocation={formData.location_address}
@@ -207,26 +245,36 @@ const IncidentReporting: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Phone className="h-5 w-5 mr-2 text-red-600" />
-                Emergency Contacts
+                Emergency Contacts - India
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 bg-red-50 rounded-lg">
-                <h3 className="font-semibold text-red-600">Emergency Services</h3>
-                <p className="text-2xl font-bold">102</p>
-                <p className="text-sm text-muted-foreground">For immediate life-threatening emergencies</p>
+                <h3 className="font-semibold text-red-600">National Emergency Number</h3>
+                <p className="text-3xl font-bold">112</p>
+                <p className="text-sm text-muted-foreground">For all emergencies - Police, Fire, Medical</p>
               </div>
               
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h3 className="font-semibold text-blue-600">Non-Emergency Police</h3>
-                <p className="text-lg font-semibold">100</p>
-                <p className="text-sm text-muted-foreground">For non-urgent police matters</p>
-              </div>
-              
-              <div className="p-4 bg-yellow-50 rounded-lg">
-                <h3 className="font-semibold text-yellow-600">Poison Control</h3>
-                <p className="text-lg font-semibold">1-800-222-1222</p>
-                <p className="text-sm text-muted-foreground">24/7 poison emergency helpline</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <h4 className="font-semibold text-blue-600">Police</h4>
+                  <p className="text-lg font-semibold">100</p>
+                </div>
+                
+                <div className="p-3 bg-red-50 rounded-lg">
+                  <h4 className="font-semibold text-red-600">Fire</h4>
+                  <p className="text-lg font-semibold">101</p>
+                </div>
+                
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <h4 className="font-semibold text-green-600">Ambulance</h4>
+                  <p className="text-lg font-semibold">102</p>
+                </div>
+                
+                <div className="p-3 bg-purple-50 rounded-lg">
+                  <h4 className="font-semibold text-purple-600">Women Helpline</h4>
+                  <p className="text-lg font-semibold">1091</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -235,7 +283,7 @@ const IncidentReporting: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <AlertTriangle className="h-5 w-5 mr-2 text-yellow-600" />
-                Reporting Guidelines
+                Emergency Guidelines
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -243,23 +291,23 @@ const IncidentReporting: React.FC = () => {
                 <Clock className="h-4 w-4 mt-1 mr-2 text-blue-600" />
                 <div>
                   <p className="font-medium">Report Immediately</p>
-                  <p className="text-sm text-muted-foreground">Time-sensitive incidents should be reported as soon as safely possible.</p>
+                  <p className="text-sm text-muted-foreground">Call 112 first for life-threatening emergencies, then submit this report.</p>
                 </div>
               </div>
               
               <div className="flex items-start">
-                <MapPin className="h-4 w-4 mt-1 mr-2 text-blue-600" />
+                <Phone className="h-4 w-4 mt-1 mr-2 text-blue-600" />
                 <div>
-                  <p className="font-medium">Precise Location</p>
-                  <p className="text-sm text-muted-foreground">Include specific addresses, landmarks, or cross streets when possible.</p>
+                  <p className="font-medium">Stay On The Line</p>
+                  <p className="text-sm text-muted-foreground">When calling 112, stay calm and provide clear information about location and emergency type.</p>
                 </div>
               </div>
               
               <div className="flex items-start">
                 <AlertTriangle className="h-4 w-4 mt-1 mr-2 text-blue-600" />
                 <div>
-                  <p className="font-medium">Stay Safe</p>
-                  <p className="text-sm text-muted-foreground">Your safety is the priority. Don't put yourself at risk to gather information.</p>
+                  <p className="font-medium">Patient Safety First</p>
+                  <p className="text-sm text-muted-foreground">Ensure patient safety and provide accurate medical information to first responders.</p>
                 </div>
               </div>
             </CardContent>
