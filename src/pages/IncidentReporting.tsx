@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -62,7 +61,7 @@ const IncidentReporting: React.FC = () => {
       return;
     }
 
-    // More flexible validation - only require title and incident type
+    // Basic validation - only require title
     if (!formData.title.trim()) {
       toast({
         title: 'Error',
@@ -72,33 +71,18 @@ const IncidentReporting: React.FC = () => {
       return;
     }
 
-    if (!formData.incident_type) {
-      toast({
-        title: 'Error',
-        description: 'Please select an incident type.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Only require location if not detected automatically
-    if (!formData.location_address.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Please provide or detect your location.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     try {
       console.log('Preparing incident data...');
       
       const incidentData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description || 'Emergency incident reported',
+        incident_type: (formData.incident_type || 'medical') as any,
+        location_address: formData.location_address || 'Location not specified',
+        location_lat: formData.location_lat,
+        location_lng: formData.location_lng,
         user_id: user.id,
-        incident_type: formData.incident_type as any,
-        // Include patient details if provided
+        // Patient details
         patient_name: patientDetails.patient_name || null,
         patient_age: patientDetails.patient_age ? parseInt(patientDetails.patient_age) : null,
         patient_gender: patientDetails.patient_gender || null,
@@ -107,17 +91,6 @@ const IncidentReporting: React.FC = () => {
         patient_medical_conditions: patientDetails.patient_medical_conditions || null,
         patient_allergies: patientDetails.patient_allergies || null,
         auto_filled_from_profile: patientDetails.auto_filled_from_profile,
-        // Enhanced description with all details
-        description: `${formData.description || 'Emergency incident reported'}
-${selectedSymptoms.length > 0 ? `\n\nSymptoms: ${selectedSymptoms.join(', ')}` : ''}
-${patientDetails.patient_name ? `\n\nPatient: ${patientDetails.patient_name}` : ''}
-${patientDetails.patient_age ? `, Age: ${patientDetails.patient_age}` : ''}
-${patientDetails.patient_gender ? `, Gender: ${patientDetails.patient_gender}` : ''}
-${patientDetails.patient_phone ? `\nPhone: ${patientDetails.patient_phone}` : ''}
-${patientDetails.patient_emergency_contact ? `\nEmergency Contact: ${patientDetails.patient_emergency_contact}` : ''}
-${patientDetails.patient_medical_conditions ? `\nMedical Conditions: ${patientDetails.patient_medical_conditions}` : ''}
-${patientDetails.patient_allergies ? `\nAllergies: ${patientDetails.patient_allergies}` : ''}
-${dispatchedHospital ? `\n\nAmbulance dispatched from: ${dispatchedHospital.name}` : ''}`.trim(),
       };
 
       console.log('Final incident data:', incidentData);
@@ -216,7 +189,7 @@ ${dispatchedHospital ? `\n\nAmbulance dispatched from: ${dispatchedHospital.name
                 </div>
 
                 <div>
-                  <Label htmlFor="type">Emergency Type *</Label>
+                  <Label htmlFor="type">Emergency Type</Label>
                   <Select value={formData.incident_type} onValueChange={(value) => handleInputChange('incident_type', value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select emergency type" />
