@@ -48,6 +48,11 @@ const IncidentReporting: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submission started');
+    console.log('User:', user);
+    console.log('Form data:', formData);
+    console.log('Patient details:', patientDetails);
+    
     if (!user) {
       toast({
         title: 'Error',
@@ -57,24 +62,65 @@ const IncidentReporting: React.FC = () => {
       return;
     }
 
-    if (!formData.title || !formData.incident_type || !patientDetails.patient_name || !patientDetails.patient_age) {
+    // More flexible validation - only require title and incident type
+    if (!formData.title.trim()) {
       toast({
         title: 'Error',
-        description: 'Please fill in all required fields including patient information.',
+        description: 'Please provide an incident title.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!formData.incident_type) {
+      toast({
+        title: 'Error',
+        description: 'Please select an incident type.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Only require location if not detected automatically
+    if (!formData.location_address.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please provide or detect your location.',
         variant: 'destructive',
       });
       return;
     }
 
     try {
+      console.log('Preparing incident data...');
+      
       const incidentData = {
         ...formData,
-        ...patientDetails,
-        patient_age: parseInt(patientDetails.patient_age) || null,
         user_id: user.id,
         incident_type: formData.incident_type as any,
-        description: `${formData.description}\n\nSymptoms: ${selectedSymptoms.join(', ')}\n\nPatient: ${patientDetails.patient_name}, Age: ${patientDetails.patient_age}, Gender: ${patientDetails.patient_gender}\nPhone: ${patientDetails.patient_phone}\nEmergency Contact: ${patientDetails.patient_emergency_contact}\nMedical Conditions: ${patientDetails.patient_medical_conditions || 'None reported'}\nAllergies: ${patientDetails.patient_allergies || 'None reported'}${dispatchedHospital ? `\n\nAmbulance dispatched from: ${dispatchedHospital.name}` : ''}`,
+        // Include patient details if provided
+        patient_name: patientDetails.patient_name || null,
+        patient_age: patientDetails.patient_age ? parseInt(patientDetails.patient_age) : null,
+        patient_gender: patientDetails.patient_gender || null,
+        patient_phone: patientDetails.patient_phone || null,
+        patient_emergency_contact: patientDetails.patient_emergency_contact || null,
+        patient_medical_conditions: patientDetails.patient_medical_conditions || null,
+        patient_allergies: patientDetails.patient_allergies || null,
+        auto_filled_from_profile: patientDetails.auto_filled_from_profile,
+        // Enhanced description with all details
+        description: `${formData.description || 'Emergency incident reported'}
+${selectedSymptoms.length > 0 ? `\n\nSymptoms: ${selectedSymptoms.join(', ')}` : ''}
+${patientDetails.patient_name ? `\n\nPatient: ${patientDetails.patient_name}` : ''}
+${patientDetails.patient_age ? `, Age: ${patientDetails.patient_age}` : ''}
+${patientDetails.patient_gender ? `, Gender: ${patientDetails.patient_gender}` : ''}
+${patientDetails.patient_phone ? `\nPhone: ${patientDetails.patient_phone}` : ''}
+${patientDetails.patient_emergency_contact ? `\nEmergency Contact: ${patientDetails.patient_emergency_contact}` : ''}
+${patientDetails.patient_medical_conditions ? `\nMedical Conditions: ${patientDetails.patient_medical_conditions}` : ''}
+${patientDetails.patient_allergies ? `\nAllergies: ${patientDetails.patient_allergies}` : ''}
+${dispatchedHospital ? `\n\nAmbulance dispatched from: ${dispatchedHospital.name}` : ''}`.trim(),
       };
+
+      console.log('Final incident data:', incidentData);
 
       await createIncident.mutateAsync(incidentData);
 
@@ -106,7 +152,10 @@ const IncidentReporting: React.FC = () => {
       });
       setSelectedSymptoms([]);
       setDispatchedHospital(null);
+
+      console.log('Form reset successfully');
     } catch (error) {
+      console.error('Error submitting incident:', error);
       toast({
         title: 'Error',
         description: 'Failed to submit emergency report. Please try again or call 112 immediately.',
@@ -116,10 +165,12 @@ const IncidentReporting: React.FC = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
+    console.log(`Updating ${field} to:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleLocationChange = (address: string, lat?: number, lng?: number) => {
+    console.log('Location changed:', { address, lat, lng });
     setFormData(prev => ({
       ...prev,
       location_address: address,
@@ -129,6 +180,7 @@ const IncidentReporting: React.FC = () => {
   };
 
   const handleAmbulanceDispatch = (hospital: any) => {
+    console.log('Ambulance dispatched from:', hospital);
     setDispatchedHospital(hospital);
   };
 
@@ -137,7 +189,7 @@ const IncidentReporting: React.FC = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-red-600">Report an Emergency</h1>
         <p className="text-muted-foreground">
-          Provide incident and patient details to get immediate medical assistance. Call 112 for life-threatening emergencies.
+          Provide incident details to get immediate medical assistance. Call 112 for life-threatening emergencies.
         </p>
       </div>
 
