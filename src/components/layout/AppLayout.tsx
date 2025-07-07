@@ -13,18 +13,22 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background w-full">
       <Navbar />
-      <div className="flex">
-        {user && (
-          <SidebarProvider>
+      {user ? (
+        <SidebarProvider>
+          <div className="flex min-h-screen w-full">
             <Sidebar />
-          </SidebarProvider>
-        )}
-        <main className={`flex-1 ${user ? 'ml-64' : ''} p-6`}>
+            <main className="flex-1 p-6">
+              {children || <Outlet />}
+            </main>
+          </div>
+        </SidebarProvider>
+      ) : (
+        <main className="p-6">
           {children || <Outlet />}
         </main>
-      </div>
+      )}
     </div>
   );
 };

@@ -10,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Shield, MapPin, MessageCircle, Plus, User } from 'lucide-react';
 
@@ -46,8 +47,11 @@ const Sidebar = () => {
   ];
   
   return (
-    <SidebarUI>
+    <SidebarUI className="w-64">
       <SidebarContent>
+        <div className="p-2">
+          <SidebarTrigger />
+        </div>
         <SidebarGroup>
           <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
