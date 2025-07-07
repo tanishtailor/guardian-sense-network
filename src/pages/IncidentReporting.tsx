@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,15 +52,6 @@ const IncidentReporting: React.FC = () => {
     console.log('User:', user);
     console.log('Form data:', formData);
     console.log('Patient details:', patientDetails);
-    
-    if (!user) {
-      toast({
-        title: 'Error',
-        description: 'You must be logged in to report an incident.',
-        variant: 'destructive',
-      });
-      return;
-    }
 
     // Basic validation - only require title
     if (!formData.title.trim()) {
@@ -81,7 +73,7 @@ const IncidentReporting: React.FC = () => {
         location_address: formData.location_address || 'Location not specified',
         location_lat: formData.location_lat,
         location_lng: formData.location_lng,
-        user_id: user.id,
+        user_id: user?.id || null, // Make user_id optional - null if not logged in
         // Patient details
         patient_name: patientDetails.patient_name || null,
         patient_age: patientDetails.patient_age ? parseInt(patientDetails.patient_age) : null,
@@ -162,7 +154,7 @@ const IncidentReporting: React.FC = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-red-600">Report an Emergency</h1>
         <p className="text-muted-foreground">
-          Provide incident details to get immediate medical assistance. Call 112 for life-threatening emergencies.
+          Anyone can report an emergency. Provide incident details to get immediate medical assistance. Call 112 for life-threatening emergencies.
         </p>
       </div>
 
