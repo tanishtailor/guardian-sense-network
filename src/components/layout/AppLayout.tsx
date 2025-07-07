@@ -2,6 +2,7 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface AppLayoutProps {
@@ -15,7 +16,11 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="flex">
-        {user && <Sidebar />}
+        {user && (
+          <SidebarProvider>
+            <Sidebar />
+          </SidebarProvider>
+        )}
         <main className={`flex-1 ${user ? 'ml-64' : ''} p-6`}>
           {children || <Outlet />}
         </main>
