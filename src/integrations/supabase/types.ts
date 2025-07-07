@@ -55,6 +55,7 @@ export type Database = {
       }
       incidents: {
         Row: {
+          auto_filled_from_profile: boolean | null
           created_at: string | null
           description: string | null
           id: string
@@ -62,12 +63,20 @@ export type Database = {
           location_address: string | null
           location_lat: number | null
           location_lng: number | null
+          patient_age: number | null
+          patient_allergies: string | null
+          patient_emergency_contact: string | null
+          patient_gender: string | null
+          patient_medical_conditions: string | null
+          patient_name: string | null
+          patient_phone: string | null
           status: Database["public"]["Enums"]["incident_status"]
           title: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          auto_filled_from_profile?: boolean | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -75,12 +84,20 @@ export type Database = {
           location_address?: string | null
           location_lat?: number | null
           location_lng?: number | null
+          patient_age?: number | null
+          patient_allergies?: string | null
+          patient_emergency_contact?: string | null
+          patient_gender?: string | null
+          patient_medical_conditions?: string | null
+          patient_name?: string | null
+          patient_phone?: string | null
           status?: Database["public"]["Enums"]["incident_status"]
           title: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          auto_filled_from_profile?: boolean | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -88,6 +105,13 @@ export type Database = {
           location_address?: string | null
           location_lat?: number | null
           location_lng?: number | null
+          patient_age?: number | null
+          patient_allergies?: string | null
+          patient_emergency_contact?: string | null
+          patient_gender?: string | null
+          patient_medical_conditions?: string | null
+          patient_name?: string | null
+          patient_phone?: string | null
           status?: Database["public"]["Enums"]["incident_status"]
           title?: string
           updated_at?: string | null
