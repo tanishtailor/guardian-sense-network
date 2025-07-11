@@ -13,7 +13,7 @@ export const useAdminStatus = () => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('role')
+        .select('*')
         .eq('id', user.id)
         .single();
 
@@ -22,7 +22,9 @@ export const useAdminStatus = () => {
         return false;
       }
 
-      return (data as any)?.role === 'admin';
+      // Check if the role property exists and if it's admin
+      const userRole = (data as any)?.role;
+      return userRole === 'admin';
     },
     enabled: !!user,
   });
