@@ -49,6 +49,32 @@ export const useDeleteIncident = () => {
     mutationFn: async (incidentId: string) => {
       console.log('Attempting to delete incident with ID:', incidentId);
       
+      // First check if user is admin
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      console.log('Current user ID:', user.id);
+
+      // Check admin status
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error checking user profile:', profileError);
+        throw new Error('Failed to verify admin status');
+      }
+
+      console.log('User profile role:', profile?.role);
+
+      if (profile?.role !== 'admin') {
+        throw new Error('Only admin users can delete incidents');
+      }
+
       const { error } = await supabase
         .from('incidents')
         .delete()
