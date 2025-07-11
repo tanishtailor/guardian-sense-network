@@ -69,9 +69,9 @@ export const useDeleteIncident = () => {
         throw new Error('Failed to verify admin status');
       }
 
-      console.log('User profile role:', profile?.role);
+      console.log('User profile role:', (profile as any)?.role);
 
-      if (profile?.role !== 'admin') {
+      if ((profile as any)?.role !== 'admin') {
         throw new Error('Only admin users can delete incidents');
       }
 

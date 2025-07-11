@@ -22,7 +22,7 @@ export const useAdminStatus = () => {
         return false;
       }
 
-      return data?.role === 'admin';
+      return (data as any)?.role === 'admin';
     },
     enabled: !!user,
   });
