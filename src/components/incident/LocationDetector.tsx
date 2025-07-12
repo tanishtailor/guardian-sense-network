@@ -31,7 +31,6 @@ const LocationDetector: React.FC<LocationDetectorProps> = ({ onLocationChange, i
         const { latitude, longitude } = position.coords;
         
         try {
-          // Use reverse geocoding to get address
           const response = await fetch(
             `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR_API_KEY&pretty=1&no_annotations=1`
           );
@@ -48,13 +47,11 @@ const LocationDetector: React.FC<LocationDetectorProps> = ({ onLocationChange, i
               onLocationChange(fallbackAddress, latitude, longitude);
             }
           } else {
-            // Fallback to coordinates if geocoding fails
             const fallbackAddress = `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`;
             setAddress(fallbackAddress);
             onLocationChange(fallbackAddress, latitude, longitude);
           }
         } catch (err) {
-          // Fallback to coordinates if any error occurs
           const fallbackAddress = `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`;
           setAddress(fallbackAddress);
           onLocationChange(fallbackAddress, latitude, longitude);

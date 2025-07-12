@@ -17,7 +17,6 @@ import { Shield, MapPin, MessageCircle, Plus, User } from 'lucide-react';
 const Sidebar = () => {
   const location = useLocation();
   
-  // Navigation items
   const navItems = [
     {
       title: 'Dashboard',

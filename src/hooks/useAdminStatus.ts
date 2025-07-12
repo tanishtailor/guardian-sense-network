@@ -22,7 +22,6 @@ export const useAdminStatus = () => {
         return false;
       }
 
-      // Check if the role property exists and if it's admin
       const userRole = (data as any)?.role;
       return userRole === 'admin';
     },
