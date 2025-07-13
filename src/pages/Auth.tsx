@@ -167,7 +167,7 @@ const Auth: React.FC = () => {
                       minLength={6}
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white" disabled={loading}>
                     {loading ? 'Creating Account...' : 'Create Account'}
                   </Button>
                 </form>
